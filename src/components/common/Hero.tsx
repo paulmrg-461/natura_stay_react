@@ -1,10 +1,36 @@
 import React from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Calendar, Users } from 'lucide-react';
 
 /**
  * Componente Hero principal con búsqueda
  */
 const Hero: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [guests, setGuests] = useState('1');
+  const [checkIn, setCheckIn] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Construir parámetros de búsqueda
+    const searchParams = new URLSearchParams();
+    if (searchQuery.trim()) {
+      searchParams.set('search', searchQuery.trim());
+    }
+    if (guests !== '1') {
+      searchParams.set('guests', guests);
+    }
+    if (checkIn) {
+      searchParams.set('checkin', checkIn);
+    }
+    
+    // Navegar a la página de propiedades con los filtros
+    navigate(`/propiedades?${searchParams.toString()}`);
+  };
+
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Imagen de fondo */}
@@ -32,18 +58,20 @@ const Hero: React.FC = () => {
         </p>
 
         {/* Formulario de búsqueda */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl max-w-4xl mx-auto">
+        <form onSubmit={handleSearch} className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Destino */}
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Destino
+                Destino o Finca
               </label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="¿A dónde quieres ir?"
+                  placeholder="Buscar por ciudad o nombre de finca..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
                 />
               </div>
@@ -58,6 +86,8 @@ const Hero: React.FC = () => {
                 <Calendar className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
                   type="date"
+                  value={checkIn}
+                  onChange={(e) => setCheckIn(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
                 />
               </div>
@@ -70,25 +100,35 @@ const Hero: React.FC = () => {
               </label>
               <div className="relative">
                 <Users className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <select className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900">
-                  <option>1 huésped</option>
-                  <option>2 huéspedes</option>
-                  <option>3 huéspedes</option>
-                  <option>4 huéspedes</option>
-                  <option>5+ huéspedes</option>
+                <select 
+                  value={guests}
+                  onChange={(e) => setGuests(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
+                >
+                  <option value="1">1 huésped</option>
+                  <option value="2">2 huéspedes</option>
+                  <option value="3">3 huéspedes</option>
+                  <option value="4">4 huéspedes</option>
+                  <option value="5">5 huéspedes</option>
+                  <option value="6">6 huéspedes</option>
+                  <option value="8">8 huéspedes</option>
+                  <option value="10">10+ huéspedes</option>
                 </select>
               </div>
             </div>
 
             {/* Botón de búsqueda */}
             <div className="flex items-end">
-              <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl">
+              <button 
+                type="submit"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
+              >
                 <Search className="h-5 w-5" />
                 <span>Buscar</span>
               </button>
             </div>
           </div>
-        </div>
+        </form>
 
         {/* Estadísticas */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Property, FilterOptions } from '../types';
 import { mockProperties } from '../data/properties';
 
@@ -7,6 +8,7 @@ import { mockProperties } from '../data/properties';
  * Preparado para futuras integraciones con APIs externas
  */
 export const useProperties = (initialFilters?: Partial<FilterOptions>) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,6 +20,21 @@ export const useProperties = (initialFilters?: Partial<FilterOptions>) => {
     location: '',
     ...initialFilters
   });
+
+  // Inicializar filtros desde URL params
+  useEffect(() => {
+    const searchQuery = searchParams.get('search');
+    const guestsParam = searchParams.get('guests');
+    const checkinParam = searchParams.get('checkin');
+    
+    if (searchQuery || guestsParam || checkinParam) {
+      setFilters(prev => ({
+        ...prev,
+        location: searchQuery || prev.location,
+        guests: guestsParam ? parseInt(guestsParam) : prev.guests
+      }));
+    }
+  }, [searchParams]);
 
   // Simulación de carga de datos (preparado para API)
   useEffect(() => {
@@ -44,9 +61,13 @@ export const useProperties = (initialFilters?: Partial<FilterOptions>) => {
       const matchesPrice = property.pricing.basePrice >= filters.minPrice && 
                           property.pricing.basePrice <= filters.maxPrice;
       const matchesGuests = property.capacity.maxGuests >= filters.guests;
+      
+      // Búsqueda mejorada: por nombre de finca, ciudad o región
+      const searchTerm = filters.location.toLowerCase();
       const matchesLocation = !filters.location || 
-                             property.location.city.toLowerCase().includes(filters.location.toLowerCase()) ||
-                             property.location.region.toLowerCase().includes(filters.location.toLowerCase());
+                             property.name.toLowerCase().includes(searchTerm) ||
+                             property.location.city.toLowerCase().includes(searchTerm) ||
+                             property.location.region.toLowerCase().includes(searchTerm);
 
       return matchesType && matchesPrice && matchesGuests && matchesLocation;
     });
@@ -54,6 +75,17 @@ export const useProperties = (initialFilters?: Partial<FilterOptions>) => {
 
   const updateFilters = (newFilters: Partial<FilterOptions>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
+    
+    // Actualizar URL params si es necesario
+    if (newFilters.location !== undefined) {
+      const newSearchParams = new URLSearchParams(searchParams);
+      if (newFilters.location) {
+        newSearchParams.set('search', newFilters.location);
+      } else {
+        newSearchParams.delete('search');
+      }
+      setSearchParams(newSearchParams);
+    }
   };
 
   const resetFilters = () => {
@@ -64,6 +96,9 @@ export const useProperties = (initialFilters?: Partial<FilterOptions>) => {
       guests: 1,
       location: ''
     });
+    
+    // Limpiar URL params
+    setSearchParams({});
   };
 
   return {

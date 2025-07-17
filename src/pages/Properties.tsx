@@ -1,4 +1,6 @@
 import React from 'react';
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PropertyList from '../components/properties/PropertyList';
 import PropertyFilters from '../components/properties/PropertyFilters';
 import { useProperties } from '../hooks/useProperties';
@@ -7,7 +9,12 @@ import { useProperties } from '../hooks/useProperties';
  * Página de listado de propiedades con filtros
  */
 const Properties: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const { properties, loading, filters, updateFilters, resetFilters } = useProperties();
+
+  // Mostrar información de búsqueda activa
+  const searchQuery = searchParams.get('search');
+  const hasActiveSearch = searchQuery || filters.location;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -15,11 +22,21 @@ const Properties: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Todas las Propiedades
+            {hasActiveSearch ? 'Resultados de Búsqueda' : 'Todas las Propiedades'}
           </h1>
-          <p className="text-xl text-gray-600">
-            Encuentra tu refugio perfecto entre nuestras {properties.length} propiedades disponibles
-          </p>
+          <div className="text-xl text-gray-600">
+            {hasActiveSearch && (
+              <div className="mb-2">
+                <span className="font-medium">Buscando:</span> "{searchQuery || filters.location}"
+              </div>
+            )}
+            <p>
+              {properties.length > 0 
+                ? `${properties.length} ${properties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}`
+                : 'No se encontraron propiedades con los criterios actuales'
+              }
+            </p>
+          </div>
         </div>
 
         {/* Filtros */}

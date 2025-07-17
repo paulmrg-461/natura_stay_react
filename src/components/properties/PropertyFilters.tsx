@@ -145,15 +145,20 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
         {/* Ubicación */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Ubicación
+            Buscar por nombre o ubicación
           </label>
           <input
             type="text"
-            placeholder="Ciudad o región"
+            placeholder="Nombre de finca, ciudad o región..."
             value={filters.location}
             onChange={(e) => onFiltersChange({ location: e.target.value })}
             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           />
+          {filters.location && (
+            <div className="text-xs text-gray-500 mt-1">
+              Buscando en nombres de fincas, ciudades y regiones
+            </div>
+          )}
         </div>
       </div>
     </div>
